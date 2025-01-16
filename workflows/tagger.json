@@ -1,0 +1,44 @@
+{
+  "10": {
+    "inputs": {
+      "model": "wd-v1-4-convnextv2-tagger-v2",
+      "threshold": 0.35,
+      "character_threshold": 0.85,
+      "replace_underscore": false,
+      "trailing_comma": false,
+      "exclude_tags": "",
+      "tags": "",
+      "image": [
+        "11",
+        0
+      ]
+    },
+    "class_type": "WD14Tagger|pysssss",
+    "_meta": {
+      "title": "WD14 Tagger 🐍"
+    }
+  },
+  "11": {
+    "inputs": {
+      "image": "C:\\Users\\jzj\\Pictures\\corser\\corser4.jpg",
+      "upload": "image"
+    },
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "加载图像"
+    }
+  },
+  "12": {
+    "inputs": {
+      "text": [
+        "10",
+        0
+      ],
+      "text2": ""
+    },
+    "class_type": "TextPreview",
+    "_meta": {
+      "title": "Preview Text"
+    }
+  }
+}
