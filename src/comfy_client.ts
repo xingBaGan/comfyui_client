@@ -39,22 +39,25 @@ export class ComfyClient {
         const client = new ComfyClient(url);
         console.log(`Connecting to ${client.url}`);
 
-        // 获取系统信息
-        const systemStats = await client.get('system_stats');
-        client.deviceInfo = {
-            type: systemStats.devices[0]?.type,
-            name: systemStats.devices[0]?.name,
-            total_memory: systemStats.devices[0]?.total_memory,
-            free_memory: systemStats.devices[0]?.free_memory
-        };
+        // // 获取系统信息
+        // const systemStats = await client.get('system_stats');
+        // client.deviceInfo = {
+        //     type: systemStats.devices[0]?.type,
+        //     name: systemStats.devices[0]?.name,
+        //     total_memory: systemStats.devices[0]?.total_memory,
+        //     free_memory: systemStats.devices[0]?.free_memory
+        // };
 
         // 建立WebSocket连接
         const wsUrl = client.getWebSocketUrl();
         try {
-            client.ws = new WebSocket(`${wsUrl}/ws?clientId=${client.clientId}`);
+            client.ws = new WebSocket(`${wsUrl}/ws?clientId=${this.clientId}`);
+            this.ws = client.ws;
+            console.log('this.ws', this.ws);
             await new Promise((resolve, reject) => {
                 client.ws!.on('open', () => {
                     this.isConnected = true;
+                    console.log('WebSocket connection opened');
                     resolve(void 0);
                 });
                 client.ws!.on('error', reject);
@@ -64,13 +67,13 @@ export class ComfyClient {
         }
 
         // 获取节点信息
-        const nodes = await client.get('object_info');
-        client.models.nodeInputs = {};
-        Object.keys(nodes).forEach(name => {
-            client.models.nodeInputs![name] = nodes[name].input;
-        });
+        // const nodes = await client.get('object_info');
+        // client.models.nodeInputs = {};
+        // Object.keys(nodes).forEach(name => {
+        //     client.models.nodeInputs![name] = nodes[name].input;
+        // });
 
-        client.isConnected = true;
+        // client.isConnected = true;
         client.startListening();
 
         return client;
@@ -114,7 +117,7 @@ export class ComfyClient {
             client_id: this.clientId,
             front
         };
-
+        console.log('prompt data', data);
         try {
             const result = await this.post('prompt', data);
             job.remoteId = result.prompt_id;
@@ -127,15 +130,19 @@ export class ComfyClient {
 
     private startListening(): void {
         if (!this.ws) return;
-
-        this.ws.on('message', async (data: WebSocket.Data) => {
+        console.log('startListening');
+        this.ws.onmessage = async (event) => {
             try {
-                const message = JSON.parse(data.toString());
-                await this.handleMessage(message);
+                const message = JSON.parse(event.data.toString());
+                // console.log('message', message);
+                if (message.type != 'crystools.monitor') {
+                    console.log('收到WebSocket消息:', JSON.stringify(message, null, 2));
+                    await this.handleMessage(message);
+                }
             } catch (e) {
                 console.error('Error handling message:', e);
             }
-        });
+        };
 
         this.ws.on('close', () => {
             this.isConnected = false;
@@ -151,16 +158,16 @@ export class ComfyClient {
         const { type, data } = message;
 
         switch (type) {
-            case 'executing':
+            case ClientEvent.STARTED:
                 await this.handleExecuting(data);
                 break;
-            case 'progress':
+            case ClientEvent.PROGRESS:
                 await this.handleProgress(data);
                 break;
-            case 'executed':
+            case ClientEvent.COMPLETED:
                 await this.handleExecuted(data);
                 break;
-            case 'execution_error':
+            case ClientEvent.ERROR:
                 await this.handleError(data);
                 break;
         }
@@ -183,6 +190,7 @@ export class ComfyClient {
     }
 
     private async handleExecuted(data: any): Promise<void> {
+        console.log('handleExecuted', data);
         if (this.active && this.active.remoteId) {
             await this.reportProgress(ClientEvent.COMPLETED, this.active.localId, 1);
             this.clearJob(this.active.remoteId);

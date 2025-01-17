@@ -7,9 +7,8 @@
       "replace_underscore": false,
       "trailing_comma": false,
       "exclude_tags": "",
-      "tags": "",
       "image": [
-        "11",
+        "16",
         0
       ]
     },
@@ -18,27 +17,25 @@
       "title": "WD14 Tagger 🐍"
     }
   },
-  "11": {
-    "inputs": {
-      "image": "C:\\Users\\jzj\\Pictures\\face\\face2.png",
-      "upload": "image"
-    },
-    "class_type": "LoadImage",
+  "16": {
+    "inputs": {},
+    "class_type": "ETN_KritaCanvas",
     "_meta": {
-      "title": "加载图像"
+      "title": "Krita Canvas"
     }
   },
-  "12": {
+  "17": {
     "inputs": {
-      "text": [
+      "name": "Output",
+      "type": "text",
+      "value": [
         "10",
         0
-      ],
-      "text2": ""
+      ]
     },
-    "class_type": "TextPreview",
+    "class_type": "ETN_KritaSendText",
     "_meta": {
-      "title": "Preview Text"
+      "title": "Send Text"
     }
   }
 }

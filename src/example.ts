@@ -24,7 +24,7 @@ async function main() {
         console.log('Connected to ComfyUI server');
 
         // 加载tagger工作流
-        const taggerPath = join(workflowsDir, 'tagger.json');
+        const taggerPath = join(workflowsDir, 't2i.json');
         const tagger = JSON.parse(readFileSync(taggerPath, 'utf-8')) as RawWorkflow;
 
         // 解析工作流参数
@@ -40,7 +40,7 @@ async function main() {
         setTimeout(async () => {
             await client.disconnect();
             console.log('已断开连接');
-        }, 10000);
+        }, 80000);
 
     } catch (error) {
         console.error('发生错误:', error);
