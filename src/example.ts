@@ -1,5 +1,7 @@
 import { ComfyClient } from './comfy_client.js';
 import { WorkflowInput, RawWorkflow } from './types/index.js';
+import { WorkflowCollection } from './workflow_collection.js';
+import { extractWorkflowParameters } from './workflow_parser.js';
 import { readFileSync } from 'fs';
 import { join } from 'path';
 import { fileURLToPath } from 'url';
@@ -8,13 +10,26 @@ const __dirname = fileURLToPath(new URL('.', import.meta.url));
 
 async function main() {
     try {
+        // 初始化工作流集合
+        const workflowsDir = join(__dirname, '..', 'workflows');
+        const collection = new WorkflowCollection(workflowsDir);
+
+        // 加载工作流文件夹中的所有工作流
+        collection.loadFromFolder();
+        console.log('已加载工作流:', collection.getAllWorkflows().map(w => w.id));
+
         // 连接到ComfyUI服务器
-        const client = await ComfyClient.connect('http://localhost:8188');
+        const client = new ComfyClient('http://localhost:8188');
+        await client.connect();
         console.log('Connected to ComfyUI server');
 
         // 加载tagger工作流
-        const taggerPath = join(__dirname, '..', 'workflows', 'tagger.json');
+        const taggerPath = join(workflowsDir, 'tagger.json');
         const tagger = JSON.parse(readFileSync(taggerPath, 'utf-8')) as RawWorkflow;
+
+        // 解析工作流参数
+        const params = extractWorkflowParameters(tagger);
+        console.log('工作流参数:', params);
 
         // 提交工作流并获取作业ID
         console.log('提交工作流...');

@@ -35,7 +35,7 @@ export class ComfyClient {
         this.isConnected = false;
     }
 
-    static async connect(url: string = ComfyClient.DEFAULT_URL): Promise<ComfyClient> {
+    async connect(url: string = ComfyClient.DEFAULT_URL): Promise<ComfyClient> {
         const client = new ComfyClient(url);
         console.log(`Connecting to ${client.url}`);
 

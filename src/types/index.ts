@@ -14,8 +14,10 @@ export interface WorkflowNodeInput {
 }
 
 export interface WorkflowNode {
-    inputs: WorkflowNodeInput;
     class_type: string;
+    type?: string;
+    inputs: WorkflowNodeInput;
+    outputs?: Record<string, any>;
     _meta?: Record<string, any>;
 }
 
