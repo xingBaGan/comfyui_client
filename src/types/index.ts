@@ -42,10 +42,16 @@ export interface ClientMessage {
 }
 
 export enum ClientEvent {
+    Progress = 'progress',
+    Finished = 'finished',
+    Interrupted = 'interrupted',
+    Error = 'error',
+    Connected = 'connected',
+    Disconnected = 'disconnected',
+    Output = 'output',
+    Published = 'published',
     STARTED = 'started',
-    PROGRESS = 'progress',
-    COMPLETED = 'completed',
-    ERROR = 'error'
+    COMPLETED = 'completed'
 }
 
 export interface DeviceInfo {

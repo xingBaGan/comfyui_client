@@ -11,11 +11,7 @@ module.exports = {
       'ts-jest',
       {
         useESM: true,
-        tsconfig: 'tsconfig.json'
-      }
-    ]
+      },
+    ],
   },
-  transformIgnorePatterns: [
-    'node_modules/(?!(node-fetch)/)'
-  ]
 }; 

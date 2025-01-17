@@ -1,5 +1,5 @@
 import { ComfyClient } from './comfy_client.js';
-import { WorkflowInput, RawWorkflow } from './types/index.js';
+import { WorkflowInput, RawWorkflow, ClientEvent } from './types/index.js';
 import { WorkflowCollection } from './workflow_collection.js';
 import { extractWorkflowParameters } from './workflow_parser.js';
 import { readFileSync } from 'fs';
@@ -35,7 +35,12 @@ async function main() {
         console.log('提交工作流...');
         const jobId = await client.enqueue(tagger);
         console.log(`作业ID: ${jobId}`);
-
+        client.on(ClientEvent.STARTED, (jobId: string) => {
+            console.log(`开始作业ID: ${jobId}`);
+        });
+        client.on(ClientEvent.COMPLETED, (jobId: string) => {
+            console.log(`完成作业ID: ${jobId}`);
+        });
         // 等待一段时间后断开连接
         setTimeout(async () => {
             await client.disconnect();
