@@ -1,5 +1,5 @@
-import { createWorkflow } from '../workflow';
-import { WorkflowInput } from '../types';
+import { createWorkflow } from '../workflow.js';
+import { WorkflowInput } from '../types/index.js';
 
 describe('Workflow', () => {
     const defaultModels = {

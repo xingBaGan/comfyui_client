@@ -22,7 +22,7 @@ export class ComfyClient {
     private jobs: JobInfo[];
     private ws: WebSocket | null;
     private messageQueue: ClientMessage[];
-    private isConnected: boolean;
+    private isConnected: boolean = false;
 
     constructor(url: string = ComfyClient.DEFAULT_URL) {
         this.url = url;
@@ -53,7 +53,10 @@ export class ComfyClient {
         try {
             client.ws = new WebSocket(`${wsUrl}/ws?clientId=${client.clientId}`);
             await new Promise((resolve, reject) => {
-                client.ws!.on('open', resolve);
+                client.ws!.on('open', () => {
+                    this.isConnected = true;
+                    resolve(void 0);
+                });
                 client.ws!.on('error', reject);
             });
         } catch (e) {
@@ -75,6 +78,10 @@ export class ComfyClient {
 
     private getWebSocketUrl(): string {
         return this.url.replace('http', 'ws');
+    }
+
+    getIsConnected(): boolean {
+        return this.isConnected;
     }
 
     private async get(endpoint: string): Promise<any> {

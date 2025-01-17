@@ -39,7 +39,9 @@ export interface CustomParam {
 
 export interface WorkflowNode {
     type: string;
+    class_type?: string;
     inputs: Record<string, any>;
     outputs?: Record<string, any>;
+    input_types?: Record<string, any[]>;
     _meta?: Record<string, any>;
 } 
