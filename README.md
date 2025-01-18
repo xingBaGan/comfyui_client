@@ -1,101 +1,145 @@
-# ComfyUI TypeScript 客户端
+# ComfyUI Client
 
-这是一个用TypeScript实现的ComfyUI客户端库，可以用来与ComfyUI服务器进行交互。这个客户端库是从krita-ai-diffusion项目移植而来，去除了UI相关的部分，专注于核心功能的实现。
+ComfyUI的TypeScript客户端实现，包含Node.js SDK和React演示界面。
 
-## 功能特点
+## 功能特性
 
-- 支持连接到ComfyUI服务器
-- 支持创建和提交文生图工作流
-- 支持工作流程进度追踪
-- 支持WebSocket实时消息处理
-- 完整的TypeScript类型定义
-- 包含单元测试
+- 完整的ComfyUI WebSocket客户端实现
+- Express API服务器
+- React演示界面
+- TypeScript类型支持
+- 工作流管理
+- 图片标签生成
+
+## 目录结构
+
+```
+comfyui-client/
+├── src/                # SDK源代码
+│   ├── comfy_client.ts # ComfyUI客户端实现
+│   ├── server.ts      # Express API服务器
+│   └── types/         # TypeScript类型定义
+├── client/            # React演示界面
+├── workflows/         # 工作流JSON文件
+└── dist/             # 编译输出目录
+```
 
 ## 安装
 
+1. 克隆仓库：
 ```bash
+git clone [repository-url]
+cd comfyui-client
+```
+
+2. 安装依赖：
+```bash
+# 安装服务器依赖
+npm install
+
+# 安装客户端依赖
+cd client
 npm install
 ```
 
-## 使用示例
+## 使用方法
 
-```typescript
-import { ComfyClient } from './comfy_client';
-import { WorkflowInput } from './types';
+### 启动服务器
 
-async function main() {
-    // 连接到ComfyUI服务器
-    const client = await ComfyClient.connect('http://localhost:8188');
-    
-    // 创建工作流
-    const workflow: WorkflowInput = {
-        prompt: '一只可爱的猫咪，高清照片风格',
-        negative_prompt: '模糊的，低质量的',
-        width: 768,
-        height: 512,
-        steps: 30,
-        cfg: 7.5,
-        seed: Math.floor(Math.random() * 1000000)
-    };
-    
-    // 提交工作流
-    const jobId = await client.enqueue(workflow);
-    console.log(`作业ID: ${jobId}`);
-}
-```
-
-## 开发
-
-1. 运行测试：
 ```bash
-npm test
-```
-
-2. 运行示例：
-```bash
-npm run example
-```
-
-3. 构建项目：
-```bash
+# 编译TypeScript代码
 npm run build
+
+# 启动API服务器（支持热重载）
+npm run server
+```
+
+### 启动客户端
+
+```bash
+cd client
+npm run dev
 ```
 
 ## API文档
 
-### ComfyClient
+### Tagger API
 
-主要的客户端类，用于与ComfyUI服务器交互。
+用于生成图片标签的API接口。
 
-#### 静态方法
+**端点:** `POST /api/tagger`
 
-- `connect(url?: string): Promise<ComfyClient>`
-  连接到ComfyUI服务器。
-
-#### 实例方法
-
-- `enqueue(work: WorkflowInput, front?: boolean): Promise<string>`
-  提交一个工作流到队列中。
-  
-- `disconnect(): Promise<void>`
-  断开与服务器的连接。
-
-### WorkflowInput
-
-工作流输入参数接口。
-
-```typescript
-interface WorkflowInput {
-    prompt: string;
-    negative_prompt?: string;
-    seed?: number;
-    steps?: number;
-    cfg?: number;
-    width?: number;
-    height?: number;
-    batch_size?: number;
+**请求体:**
+```json
+{
+  "imagePath": string  // 图片文件的本地路径（必须是ComfyUI服务器可访问的路径）
 }
 ```
+
+**响应:**
+```json
+{
+  "success": boolean,
+  "data"?: {
+    "images": any[],    // 生成的图片数组（如果有）
+    "outputs": {        // 工作流输出
+      "tags": string[]
+    }
+  },
+  "error"?: string     // 错误信息（如果失败）
+}
+```
+
+**示例:**
+```bash
+curl -X POST http://localhost:3000/api/tagger \
+  -H "Content-Type: application/json" \
+  -d '{"imagePath": "/path/to/image.jpg"}'
+```
+
+**错误码:**
+- 400: 缺少必要参数
+- 500: 服务器内部错误
+
+## 配置说明
+
+### ComfyUI服务器配置
+
+默认配置：
+- 地址：`http://localhost:8188`
+- WebSocket端点：`/ws`
+
+如需修改ComfyUI服务器地址，请在实例化`ComfyClient`时传入新地址：
+
+```typescript
+const client = new ComfyClient('http://your-server:8188');
+```
+
+### Express服务器配置
+
+默认配置：
+- 端口：3000
+- CORS：已启用
+
+## 开发指南
+
+1. 修改SDK代码：
+   - 源代码在`src`目录
+   - 使用`npm run dev`实时编译
+
+2. 修改React客户端：
+   - 代码在`client`目录
+   - 使用`npm run dev`启动开发服务器
+
+3. 添加新工作流：
+   - 将工作流JSON文件放在`workflows`目录
+   - 在`server.ts`中引用新工作流
+
+## 注意事项
+
+1. 确保ComfyUI服务器已启动并可访问
+2. 图片路径必须是ComfyUI服务器可以访问的本地路径
+3. 工作流文件必须符合ComfyUI的格式要求
 
 ## 许可证
 
