@@ -1,4 +1,4 @@
-import { ComfyClient } from './comfy_client.js';
+import { ComfyClient, ExecutionResult } from './comfy_client.js';
 import { WorkflowInput, RawWorkflow, ClientEvent } from './types/index.js';
 import { WorkflowCollection } from './workflow_collection.js';
 import { extractWorkflowParameters } from './workflow_parser.js';
@@ -24,7 +24,7 @@ async function main() {
         console.log('Connected to ComfyUI server');
 
         // 加载tagger工作流
-        const taggerPath = join(workflowsDir, 't2i.json');
+        const taggerPath = join(workflowsDir, 'tagger_v3.json');
         const tagger = JSON.parse(readFileSync(taggerPath, 'utf-8')) as RawWorkflow;
 
         // 解析工作流参数
@@ -38,8 +38,9 @@ async function main() {
         client.on(ClientEvent.STARTED, (jobId: string) => {
             console.log(`开始作业ID: ${jobId}`);
         });
-        client.on(ClientEvent.COMPLETED, (jobId: string) => {
+        client.on(ClientEvent.COMPLETED, (jobId: string, result: ExecutionResult) => {
             console.log(`完成作业ID: ${jobId}`);
+            console.log('---------result.outputs---------', result.outputs);
         });
         // 等待一段时间后断开连接
         setTimeout(async () => {

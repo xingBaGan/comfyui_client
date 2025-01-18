@@ -1,0 +1,63 @@
+{
+  "10": {
+    "inputs": {
+      "model": "wd-v1-4-convnextv2-tagger-v2",
+      "threshold": 0.35,
+      "character_threshold": 0.85,
+      "replace_underscore": false,
+      "trailing_comma": false,
+      "exclude_tags": [
+        "19",
+        0
+      ],
+      "tags": "flower, outdoors, sky, day, blurry, tree, blue_sky, no_humans, depth_of_field, blurry_background, cherry_blossoms, scenery, pink_flower, realistic, branch, still_life, spring_\\(season\\)",
+      "image": [
+        "23",
+        0
+      ]
+    },
+    "class_type": "WD14Tagger|pysssss",
+    "_meta": {
+      "title": "WD14 Tagger 🐍"
+    }
+  },
+  "17": {
+    "inputs": {
+      "name": "Output",
+      "type": "text",
+      "value": [
+        "10",
+        0
+      ]
+    },
+    "class_type": "ETN_KritaSendText",
+    "_meta": {
+      "title": "Send Text"
+    }
+  },
+  "19": {
+    "inputs": {
+      "name": "exclude_tags",
+      "type": "text",
+      "default": "",
+      "min": 0,
+      "max": 0
+    },
+    "class_type": "ETN_Parameter",
+    "_meta": {
+      "title": "Parameter"
+    }
+  },
+  "23": {
+    "inputs": {
+      "image": "C:\\Users\\jzj\\Pictures\\face\\face2.png",
+      "keep_alpha_channel": false,
+      "output_mode": false,
+      "choose image to upload": "image"
+    },
+    "class_type": "LoadImageFromUrl",
+    "_meta": {
+      "title": "Load Image From URL"
+    }
+  }
+}

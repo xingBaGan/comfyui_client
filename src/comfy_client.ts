@@ -6,7 +6,6 @@ import {
     ClientModels,
     DeviceInfo,
     JobInfo,
-    Progress,
     WorkflowInput,
     RawWorkflow,
     ClientEvent
@@ -71,9 +70,8 @@ export class ComfyClient extends EventEmitter {
      */
     async connect(url: string = CONSTANTS.DEFAULT_URL): Promise<ComfyClient> {
         const client = new ComfyClient(url);
-        console.log(`Connecting to ${client.url}`);
         await this.initializeWebSocket(client);
-        client.startListening();
+        this.startListening();
         return client;
     }
 
@@ -124,7 +122,6 @@ export class ComfyClient extends EventEmitter {
         return new Promise((resolve, reject) => {
             this.ws!.on('open', () => {
                 this.isConnected = true;
-                console.log('WebSocket connection opened');
                 resolve();
             });
             this.ws!.on('error', reject);
@@ -153,7 +150,7 @@ export class ComfyClient extends EventEmitter {
             nodeCount: 0,
             sampleCount: 0
         };
-        
+
         const data = {
             prompt: 'prompt' in work ? createWorkflow(work as WorkflowInput, this.models).root : work,
             client_id: this.clientId,
@@ -173,7 +170,6 @@ export class ComfyClient extends EventEmitter {
 
     private startListening(): void {
         if (!this.ws) return;
-        console.log('startListening');
         this.ws.onmessage = async (event) => {
             try {
                 const message = event.data.toString();
@@ -213,17 +209,17 @@ export class ComfyClient extends EventEmitter {
      * 根据消息类型处理不同的消息
      */
     private handleMessageByType(data: any) {
+        const self = this;
         const handlers: Record<string, (data: any) => void> = {
-            status: ()=>{},
-            execution_start: (data) => this.handleExecutionStart(data),
-            executing: (data) => this.handleExecuting(data),
-            progress: (data) => this.handleProgress(data),
-            executed: (data) => this.handleExecuted(data),
-            execution_error: (data) => this.handleExecutionError(data),
-            execution_interrupted: (data) => this.handleExecutionInterrupted(data),
-            etn_workflow_published: (data) => this.handleWorkflowPublished(data)
+            status: () => { },
+            execution_start: function (data) { self.handleExecutionStart(data) },
+            executing: function (data) { self.handleExecuting(data) },
+            progress: function (data) { self.handleProgress(data) },
+            executed: function (data) { self.handleExecuted(data) },
+            execution_error: function (data) { self.handleExecutionError(data) },
+            execution_interrupted: function (data) { self.handleExecutionInterrupted(data) },
+            etn_workflow_published: function (data) { self.handleWorkflowPublished(data) }
         };
-        console.log(`----------${data.type}----------`);
         const handler = handlers[data.type];
         if (handler) {
             handler(data.data);
@@ -354,7 +350,6 @@ export class ComfyClient extends EventEmitter {
         this.startJob(id).then(job => {
             if (job) {
                 this.active = job;
-                console.log('this.active', this.active);
                 this.progress = new ProgressTracker(job);
                 this.images = [];
                 this.emit(ClientEvent.STARTED, job.localId);
@@ -378,7 +373,7 @@ export class ComfyClient extends EventEmitter {
                 };
                 this.outputs.set(localId, result);
                 if (this.images.length === 0) {
-                    this.emit(ClientEvent.Error, localId, 
+                    this.emit(ClientEvent.Error, localId,
                         "No new images were generated because the inputs did not change.");
                 } else {
                     this.lastImages = this.images;
@@ -391,27 +386,25 @@ export class ComfyClient extends EventEmitter {
     private handleProgress(data: any) {
         if (this.active && this.progress) {
             this.progress.handle(data);
-            this.emit(ClientEvent.Progress, this.active.localId, 
+            this.emit(ClientEvent.Progress, this.active.localId,
                 this.progress.getValue());
         }
     }
 
     private handleExecuted(data: any) {
         if (this.active && this.active.remoteId) {
-            const message: ClientMessage = { 
-                event: ClientEvent.COMPLETED, 
-                jobId: this.active.localId, 
-                value: 1 
+            const message: ClientMessage = {
+                event: ClientEvent.COMPLETED,
+                jobId: this.active.localId,
+                value: 1
             };
             this.messageQueue.push(message);
-
             // 保存执行结果
             const result: ExecutionResult = {
                 images: [...this.images],
                 outputs: data.output
             };
             this.outputs.set(this.active.localId, result);
-
             this.emit(ClientEvent.COMPLETED, this.active.localId, result);
             if (typeof this.active.remoteId === 'string') {
                 this.clearJob(this.active.remoteId);
@@ -423,11 +416,11 @@ export class ComfyClient extends EventEmitter {
         const errorJob = this.getActiveJob(data.prompt_id);
         if (errorJob && typeof errorJob.remoteId === 'string') {
             const error = data.exception_message || 'execution_error';
-            const message: ClientMessage = { 
-                event: ClientEvent.Error, 
-                jobId: errorJob.localId, 
+            const message: ClientMessage = {
+                event: ClientEvent.Error,
+                jobId: errorJob.localId,
                 value: 0,
-                error 
+                error
             };
             this.messageQueue.push(message);
             this.clearJob(errorJob.remoteId);
@@ -446,9 +439,9 @@ export class ComfyClient extends EventEmitter {
     private handleWorkflowPublished(data: any) {
         const publisher = data.data.publisher;
         const name = `${publisher.name} (${publisher.id})`;
-        this.emit(ClientEvent.Published, '', { 
-            name, 
-            workflow: data.data.workflow 
+        this.emit(ClientEvent.Published, '', {
+            name,
+            workflow: data.data.workflow
         });
     }
 
@@ -510,7 +503,7 @@ class ProgressTracker {
     getValue(): number {
         const nodePart = this.nodes / (this.info.nodeCount + 1);
         const samplePart = this.samples / Math.max(this.info.sampleCount, 1);
-        return CONSTANTS.NODE_EXECUTION_WEIGHT * nodePart + 
-               CONSTANTS.IMAGE_GENERATION_WEIGHT * samplePart;
+        return CONSTANTS.NODE_EXECUTION_WEIGHT * nodePart +
+            CONSTANTS.IMAGE_GENERATION_WEIGHT * samplePart;
     }
 } 

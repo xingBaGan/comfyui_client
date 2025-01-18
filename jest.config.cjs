@@ -14,4 +14,11 @@ module.exports = {
       },
     ],
   },
+  "collectCoverageFrom": [
+    "src/**/*.{ts,tsx}",
+    "!src/**/*.d.ts",
+    "!src/**/index.ts",
+    "!src/**/*.test.{ts,tsx}",
+    "!src/**/__tests__/**"
+  ]
 }; 
