@@ -13,11 +13,10 @@ const port = 3000;
 app.use(cors());
 app.use(express.json());
 
-// 初始化ComfyUI客户端
-const client = new ComfyClient('http://localhost:8188');
-
 // POST /api/tagger 端点
 app.post('/api/tagger', async (req: Request, res: Response) => {
+    // 初始化ComfyUI客户端
+    const client = new ComfyClient('http://localhost:8188');
     try {
         const { imagePath } = req.body;
 
