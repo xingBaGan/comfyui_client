@@ -3,14 +3,15 @@
   "version": "1.0.0",
   "description": "",
   "type": "module",
-  "main": "dist/index.js",
+  "main": "dist/server.js",
   "scripts": {
     "build": "tsc",
     "dev": "tsc -w",
     "example": "node --experimental-vm-modules dist/example.js",
-    "server": "nodemon --experimental-vm-modules dist/server.js",
+    "server": "node --experimental-vm-modules dist/server.js",
     "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js --config jest.config.cjs",
-    "test:watch": "node --experimental-vm-modules node_modules/jest/bin/jest.js --config jest.config.cjs --watch"
+    "test:watch": "node --experimental-vm-modules node_modules/jest/bin/jest.js --config jest.config.cjs --watch",
+    "prepare": "npm run build"
   },
   "keywords": [],
   "author": "",

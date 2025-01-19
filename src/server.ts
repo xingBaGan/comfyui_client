@@ -7,6 +7,17 @@ import { join } from 'path';
 import { fileURLToPath } from 'url';
 
 const __dirname = fileURLToPath(new URL('.', import.meta.url));
+
+// 获取 workflows 目录路径
+function getWorkflowsPath() {
+    // 检查是否在 Electron 打包环境中
+    if (process.resourcesPath) {
+        return join(process.resourcesPath, 'comfyui_client', 'workflows');
+    }
+    // 开发环境
+    return join(__dirname, '..', 'workflows');
+}
+
 const app = express();
 const port = 3000;
 
@@ -31,7 +42,7 @@ app.post('/api/tagger', async (req: Request, res: Response) => {
         await client.connect();
         
         // 加载tagger工作流
-        const workflowsDir = join(__dirname, '..', 'workflows');
+        const workflowsDir = getWorkflowsPath();
         const taggerPath = join(workflowsDir, 'tagger.json');
         const tagger = JSON.parse(readFileSync(taggerPath, 'utf-8')) as RawWorkflow;
 
