@@ -8,6 +8,7 @@
     "build": "tsc",
     "dev": "tsc -w",
     "example": "node --experimental-vm-modules dist/example.js",
+    "cloud-example": "node --experimental-vm-modules dist/cloud_example.js",
     "server": "node --experimental-vm-modules dist/server.js",
     "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js --config jest.config.cjs",
     "test:watch": "node --experimental-vm-modules node_modules/jest/bin/jest.js --config jest.config.cjs --watch",

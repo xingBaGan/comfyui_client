@@ -37,7 +37,7 @@ export interface ExecutionResult {
 }
 
 export class ComfyClient extends EventEmitter {
-    private url: string;
+    public url: string;
     private models: ClientModels;
     private readonly clientId: string;
     private active: JobInfo | null = null;
@@ -450,8 +450,25 @@ export class ComfyClient extends EventEmitter {
      * @param endpoint 接口端点
      * @returns Promise<any>
      */
-    private async get(endpoint: string): Promise<any> {
+    async get(endpoint: string): Promise<any> {
         const response = await fetch(`${this.url}/${endpoint}`);
+        return response.json();
+    }
+
+    /**
+     * 发送PUT请求
+     * @param endpoint 接口端点
+     * @param data 请求数据
+     * @returns Promise<any>
+     */
+    async put(endpoint: string, data: any): Promise<any> {
+        const response = await fetch(`${this.url}/${endpoint}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data),
+        });
         return response.json();
     }
 
@@ -461,7 +478,7 @@ export class ComfyClient extends EventEmitter {
      * @param data 请求数据
      * @returns Promise<any>
      */
-    private async post(endpoint: string, data: any): Promise<any> {
+    async post(endpoint: string, data: any): Promise<any> {
         const response = await fetch(`${this.url}/${endpoint}`, {
             method: 'POST',
             headers: {
