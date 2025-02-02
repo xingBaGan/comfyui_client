@@ -3,11 +3,12 @@ import cors from 'cors';
 import { ComfyClient, ExecutionResult } from './comfy_client.js';
 import { CloudClient } from './cloud_client.js';
 import { RawWorkflow, ClientEvent, WorkflowNode } from './types/index.js';
+import { createWebSocketServer } from './webSocketServer.js';
 import { readFileSync } from 'fs';
 import { join } from 'path';
 import { fileURLToPath } from 'url';
 // 读取传入的ComfyUI_URL 参数
-const ComfyUI_URL = process.argv[2];
+export const ComfyUI_URL = process.argv[2];
 const __dirname = fileURLToPath(new URL('.', import.meta.url));
 
 // 获取 workflows 目录路径
@@ -20,13 +21,14 @@ function getWorkflowsPath() {
     return join(__dirname, '..', 'workflows');
 }
 
-const app = express();
+export const app = express();
 const port = 3000;
 
+const websocketPort = 8187;
 app.use(cors());
 app.use(express.json());
-app.use(express.json({limit: '50mb'}));
-app.use(express.urlencoded({limit: '50mb', extended: true}));
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
 // POST /api/upload 端点 - 处理图片上传
 app.post('/api/upload', async (req: Request, res: Response) => {
@@ -34,7 +36,7 @@ app.post('/api/upload', async (req: Request, res: Response) => {
     try {
         const { imagePath } = req.body;
         const filename = imagePath.split('\\').pop();
-        
+
         client = new CloudClient(ComfyUI_URL);
         await client.AuthAndConnect();
 
@@ -49,10 +51,10 @@ app.post('/api/upload', async (req: Request, res: Response) => {
         const imageBuffer = readFileSync(imagePath);
         const imageData = new Uint8Array(imageBuffer);
         const imageUrl = await client.uploadImage(imageData, filename);
-        
+
         // 断开连接
         await client.disconnect();
-        
+
         // 返回上传后的URL
         res.json({
             success: true,
@@ -60,7 +62,7 @@ app.post('/api/upload', async (req: Request, res: Response) => {
                 imageUrl
             }
         });
-        
+
     } catch (error) {
         console.error('上传错误:', error);
         res.status(500).json({
@@ -109,7 +111,7 @@ app.post('/api/tagger', async (req: Request, res: Response) => {
             client.on(ClientEvent.COMPLETED, (jobId: string, result: ExecutionResult) => {
                 resolve(result);
             });
-            
+
             client.on(ClientEvent.Error, (jobId: string, error: Error) => {
                 console.error('ComfyUI 服务器错误:', error);
                 reject(error);
@@ -121,16 +123,16 @@ app.post('/api/tagger', async (req: Request, res: Response) => {
         console.log('jobId', jobId);
         // 等待结果
         const result = await resultPromise;
-        
+
         // 断开连接
         await client.disconnect();
-        
+
         // 返回结果
         res.json({
             success: true,
             data: result
         });
-        
+
     } catch (error) {
         console.error('API错误:', error);
         res.status(500).json({
@@ -140,7 +142,9 @@ app.post('/api/tagger', async (req: Request, res: Response) => {
     }
 });
 
-// 启动服务器
-app.listen(port, () => {
-    console.log(`服务器运行在 http://localhost:${port}`);
-}); 
+createWebSocketServer(app, websocketPort, ComfyUI_URL).then((server) => {
+    // 使用HTTP服务器而不是Express app来监听
+    server.listen(port, () => {
+        console.log(`服务器运行在 http://localhost:${port}`);
+    }); 
+});

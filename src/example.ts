@@ -22,31 +22,31 @@ async function main() {
         const client = new ComfyClient('http://localhost:8188');
         await client.connect();
         console.log('Connected to ComfyUI server');
+        client.sendMessage('Hello, ComfyUI!');
+        // // 加载tagger工作流
+        // const taggerPath = join(workflowsDir, 'tagger_v3.json');
+        // const tagger = JSON.parse(readFileSync(taggerPath, 'utf-8')) as RawWorkflow;
 
-        // 加载tagger工作流
-        const taggerPath = join(workflowsDir, 'tagger_v3.json');
-        const tagger = JSON.parse(readFileSync(taggerPath, 'utf-8')) as RawWorkflow;
+        // // 解析工作流参数
+        // const params = extractWorkflowParameters(tagger);
+        // console.log('工作流参数:', params);
 
-        // 解析工作流参数
-        const params = extractWorkflowParameters(tagger);
-        console.log('工作流参数:', params);
-
-        // 提交工作流并获取作业ID
-        console.log('提交工作流...');
-        const jobId = await client.enqueue(tagger);
-        console.log(`作业ID: ${jobId}`);
-        client.on(ClientEvent.STARTED, (jobId: string) => {
-            console.log(`开始作业ID: ${jobId}`);
-        });
-        client.on(ClientEvent.COMPLETED, (jobId: string, result: ExecutionResult) => {
-            console.log(`完成作业ID: ${jobId}`);
-            console.log('---------result.outputs---------', result.outputs);
-        });
-        // 等待一段时间后断开连接
-        setTimeout(async () => {
-            await client.disconnect();
-            console.log('已断开连接');
-        }, 80000);
+        // // 提交工作流并获取作业ID
+        // console.log('提交工作流...');
+        // const jobId = await client.enqueue(tagger);
+        // console.log(`作业ID: ${jobId}`);
+        // client.on(ClientEvent.STARTED, (jobId: string) => {
+        //     console.log(`开始作业ID: ${jobId}`);
+        // });
+        // client.on(ClientEvent.COMPLETED, (jobId: string, result: ExecutionResult) => {
+        //     console.log(`完成作业ID: ${jobId}`);
+        //     console.log('---------result.outputs---------', result.outputs);
+        // });
+        // // 等待一段时间后断开连接
+        // setTimeout(async () => {
+        //     await client.disconnect();
+        //     console.log('已断开连接');
+        // }, 80000);
 
     } catch (error) {
         console.error('发生错误:', error);

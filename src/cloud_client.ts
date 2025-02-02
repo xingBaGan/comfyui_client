@@ -1,6 +1,5 @@
 import { ComfyClient } from './comfy_client.js';
 
-
 interface User {
     id: string;
     name: string;

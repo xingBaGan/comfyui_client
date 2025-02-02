@@ -68,11 +68,17 @@ export class ComfyClient extends EventEmitter {
      * @param url 服务器URL
      * @returns Promise<ComfyClient>
      */
+    // 异步连接函数，默认连接地址为CONSTANTS.DEFAULT_URL
     async connect(url: string = CONSTANTS.DEFAULT_URL): Promise<ComfyClient> {
         const client = new ComfyClient(url);
         await this.initializeWebSocket(client);
         this.startListening();
         return client;
+    }
+
+    // 通过websocket发送信息
+    async sendMessage(message: string): Promise<void> {
+        this.ws?.send(message);
     }
 
     /**
